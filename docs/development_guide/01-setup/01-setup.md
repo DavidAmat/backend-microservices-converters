@@ -4,7 +4,9 @@
 
 
 ```bash
-minikube start --driver=docker --memory=16384 --cpus=8
+# minikube start --driver=docker --memory=16384 --cpus=8
+minikube start --driver=docker \
+  --insecure-registry="192.168.0.112:5000"
 ```
 
 ### Minikube status
