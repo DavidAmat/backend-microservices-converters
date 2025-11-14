@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: fastapi-demo
-          image: 192.168.0.112:5000/fastapi-demo:latest
+          image: localhost:5000/fastapi-demo:latest
           ports:
             - containerPort: 80
 ---

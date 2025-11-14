@@ -10,6 +10,6 @@ spec:
   templates:
     - name: counter
       container:
-        image: 192.168.0.112:5000/argo-counter:latest
+        image: localhost:5000/argo-counter:latest
         command: ["entrypoint"]
         args: ["main"]

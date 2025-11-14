@@ -1,8 +1,6 @@
 # Set UP
 
 ```bash
-kubectl create namespace argo
-
 
 ARGO_WORKFLOWS_VERSION="v3.7.3"  # or whatever version you choose
 kubectl create namespace argo
