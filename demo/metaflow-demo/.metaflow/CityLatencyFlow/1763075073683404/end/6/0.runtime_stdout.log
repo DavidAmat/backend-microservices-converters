@@ -1,2 +1,0 @@
-[MFLOG|0|2025-11-13T23:04:39.425098Z|runtime|139a4f69-8d1a-4b73-b317-a83c2f5dda59]Final latencies dict: {'NYC': 5.02, 'LON': 3.01, 'PAR': 4.01}
-[MFLOG|0|2025-11-13T23:04:39.425275Z|runtime|d7ecd8ca-4ea3-43f3-a76a-7d420649c8dc]Wrote latencies.json

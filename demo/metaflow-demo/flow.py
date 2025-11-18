@@ -1,81 +1,75 @@
 import json
+import os
 import time
 
 import yaml
-from metaflow import FlowSpec, environment, kubernetes, resources, step
+from metaflow import FlowSpec, IncludeFile, environment, resources, step
+
+# Shared environment variables for all steps
+COMMON_ENV = {
+    "AWS_ACCESS_KEY_ID": os.getenv("AWS_ACCESS_KEY_ID", ""),
+    "AWS_SECRET_ACCESS_KEY": os.getenv("AWS_SECRET_ACCESS_KEY", ""),
+    "AWS_DEFAULT_REGION": "us-east-1",
+}
 
 
 class CityLatencyFlow(FlowSpec):
-    @kubernetes(secrets=["aws-credentials"])
-    @environment(
-        vars={
-            "AWS_DEFAULT_REGION": "us-east-1",
-        }
+
+    config = IncludeFile(
+        "config", help="City config", is_text=True, default="config.yaml"
     )
+
+    @environment(vars=COMMON_ENV)
     @resources(cpu=1, memory=1024)
     @step
     def start(self):
-        # Read config
-        with open("config.yaml", "r") as f:
-            cfg = yaml.safe_load(f)
+        import yaml
+
+        cfg = yaml.safe_load(self.config)
+        print("Printing Config:")
+        print(cfg)
+
+        print("Printing Environment Variables:")
+        print(f"AWS_ACCESS_KEY_ID: {os.getenv('AWS_ACCESS_KEY_ID')}")
+        print(f"AWS_SECRET_ACCESS_KEY: {os.getenv('AWS_SECRET_ACCESS_KEY')}")
+        print(f"AWS_DEFAULT_REGION: {os.getenv('AWS_DEFAULT_REGION')}")
+
         self.cities = cfg["cities"]
-        # Prepare list of (code, num)
         self.city_list = [(c["code"], c["num"]) for c in self.cities]
         self.next(self.process_city, foreach="city_list")
 
-    @kubernetes(secrets=["aws-credentials"])
-    @environment(
-        vars={
-            "AWS_DEFAULT_REGION": "us-east-1",
-        }
-    )
+    @environment(vars=COMMON_ENV)
     @resources(cpu=1, memory=2048)
     @step
     def process_city(self):
-        # In a foreach branch: self.input holds one item from city_list
         code, num = self.input
         print(f"[{code}] starting loop up to {num}")
-        start_time = time.time()
+
+        start = time.time()
         for i in range(num):
             print(f"[{code}] i = {i}")
             time.sleep(1)
-        elapsed = time.time() - start_time
-        result = {"city": code, "latency_seconds": round(elapsed, 2)}
-        # store result artifact
-        self.result = result
-        print(f"[{code}] done, latency = {elapsed:.2f}")
+
+        elapsed = round(time.time() - start, 2)
+        self.result = {"city": code, "latency_seconds": elapsed}
         self.next(self.join_results)
 
-    @kubernetes(secrets=["aws-credentials"])
-    @environment(
-        vars={
-            "AWS_DEFAULT_REGION": "us-east-1",
-        }
-    )
+    @environment(vars=COMMON_ENV)
     @resources(cpu=1, memory=2048)
     @step
     def join_results(self, inputs):
-        # inputs is a list of branch tasks
-        latencies = {}
-        for inp in inputs:
-            res = inp.result
-            latencies[res["city"]] = res["latency_seconds"]
+        latencies = {
+            inp.result["city"]: inp.result["latency_seconds"] for inp in inputs
+        }
         self.latencies = latencies
-        print("Aggregated latencies:", self.latencies)
+        print("Aggregated latencies:", latencies)
         self.next(self.end)
 
-    @kubernetes(secrets=["aws-credentials"])
-    @environment(
-        vars={
-            "AWS_DEFAULT_REGION": "us-east-1",
-        }
-    )
+    @environment(vars=COMMON_ENV)
     @resources(cpu=1, memory=2048)
     @step
     def end(self):
-        # Optionally write out to file, or print JSON
-        print("Final latencies dict:", self.latencies)
-        # write to JSON file
+        print("Final latencies:", self.latencies)
         with open("latencies.json", "w") as f:
             json.dump(self.latencies, f)
         print("Wrote latencies.json")

@@ -4,3 +4,5 @@ __pycache__/
 venv/
 **/venv/
 metaflow.s3.*
+.metaflow/
+*.DS_Store
