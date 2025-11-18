@@ -74,6 +74,23 @@ class CityLatencyFlow(FlowSpec):
             json.dump(self.latencies, f)
         print("Wrote latencies.json")
 
+        import os
+
+        import boto3
+
+        print("Environment Variables:")
+        print(os.getenv("METAFLOW_S3_ENDPOINT_URL"))
+        print(os.getenv("AWS_ACCESS_KEY_ID"))
+        print(os.getenv("AWS_SECRET_ACCESS_KEY"))
+        print(os.getenv("AWS_DEFAULT_REGION"))
+        print(
+            "Uploading latencies.json to s3://metaflow/city-latency-demo-bucket/latencies.json"
+        )
+        s3 = boto3.client("s3", endpoint_url=os.getenv("METAFLOW_S3_ENDPOINT_URL"))
+        s3.upload_file(
+            "latencies.json", "metaflow", "city-latency-demo-bucket/latencies.json"
+        )
+
 
 if __name__ == "__main__":
     CityLatencyFlow()
