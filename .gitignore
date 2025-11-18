@@ -6,3 +6,10 @@ venv/
 metaflow.s3.*
 .metaflow/
 *.DS_Store
+
+# Ignore everything in .metaflowconfig
+demo/metaflow-demo/.metaflowconfig/*
+
+# Except these two files
+!demo/metaflow-demo/.metaflowconfig/config_argo.json
+!demo/metaflow-demo/.metaflowconfig/config_local.json
