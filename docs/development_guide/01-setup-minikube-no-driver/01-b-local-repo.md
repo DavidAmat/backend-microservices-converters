@@ -197,43 +197,12 @@ kubectl run test-pull \
 ```
 
 
+# Final Note (for restarting)
 
+When restarting Ubuntu, add in the `Makefile`:
 
-
-
-
-# OLD SOLUTION
 ```bash
-# sudo nano /etc/containerd/config.toml
-sudo chown david:david /etc/containerd/config.toml
-sudo chmod 644 /etc/containerd/config.toml
-
-
-# find [plugins.'io.containerd.grpc.v1.cri']
-# add
-[plugins."io.containerd.grpc.v1.cri".registry]
-  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."192.168.0.112:5000"]
-    endpoint = ["http://192.168.0.112:5000"]
-
-  [plugins."io.containerd.grpc.v1.cri".registry.configs."192.168.0.112:5000".tls]
-    insecure_skip_verify = true
-
-
-sudo systemctl restart containerd
-sudo systemctl restart kubelet
+docker start registry
 ```
 
-Verify kubernetes can now pull the image
-```bash
-kubectl run test-pull \
-  --rm -it \
-  --restart=Never \
-  --image=192.168.0.112:5000/metaflow-city-latency:latest \
-  --command -- /bin/bash
-```
-
-Verify containerd
-```bash
-sudo ctr images pull --plain-http 192.168.0.112:5000/metaflow-city-latency:latest
-
-```
+To ensure registry container starts after reboot
