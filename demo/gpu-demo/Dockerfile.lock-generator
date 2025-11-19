@@ -1,34 +1,27 @@
-# Dockerfile specifically for generating poetry.lock on the target platform
-# This ensures dependencies are resolved for Ubuntu + NVIDIA CUDA environment
-FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
+FROM nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install Python and system dependencies
+# Install system Python (3.10) and base tools
 RUN apt-get update && apt-get install -y \
-    python3.10 \
-    python3-pip \
-    python3-dev \
-    git \
-    curl \
+    python3 python3-pip python3-venv python3-dev \
+    git curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Create symbolic links for python
-RUN ln -s /usr/bin/python3.10 /usr/bin/python
+# Symlink python to python3
+RUN ln -sf /usr/bin/python3 /usr/bin/python
 
-# Install Poetry
+# Install Poetry (with virtualenvs enabled)
 RUN curl -sSL https://install.python-poetry.org | python3 -
 ENV PATH="/root/.local/bin:$PATH"
 
-# Configure Poetry to not create virtual environments (we're in a container)
-RUN poetry config virtualenvs.create false
-
 WORKDIR /app
 
-# Copy only the pyproject.toml
+# Copy only pyproject.toml for dependency resolution
 COPY pyproject.toml .
 
-# Generate the lock file
-# This command will be run to create poetry.lock
-CMD ["poetry", "lock", "--no-update"]
+# Generate poetry.lock (no dependency installation)
+RUN poetry lock
 
+# Default interactive shell
+ENTRYPOINT ["/bin/bash"]

@@ -35,6 +35,9 @@ COPY pyproject.toml poetry.lock ./
 # --no-interaction: run in non-interactive mode
 RUN poetry install --no-root --no-interaction --no-ansi
 
+# Add a dummy layer to force rebuild
+RUN touch .dummy
+
 # Copy flow file
 COPY flow.py .
 

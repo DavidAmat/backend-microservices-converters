@@ -9,6 +9,7 @@ COMMON_ENV = {
     "AWS_ACCESS_KEY_ID": os.getenv("AWS_ACCESS_KEY_ID", ""),
     "AWS_SECRET_ACCESS_KEY": os.getenv("AWS_SECRET_ACCESS_KEY", ""),
     "AWS_DEFAULT_REGION": "us-east-1",
+    "NVIDIA_VISIBLE_DEVICES": "all",
 }
 
 
@@ -98,6 +99,23 @@ class GPUInferenceFlow(FlowSpec):
                     if torch.cuda.device_count() > 0
                     else "N/A"
                 )
+
+                # Allocate a big tensor (~1GB)
+                print("Allocating a big tensor (~1GB)...")
+                tensor = torch.randn(1024, 1024, 1024).to(torch.cuda.current_device())
+                print("Tensor allocated on GPU:", tensor.device)
+                print(
+                    "GPU mem (alloc/rsrv):",
+                    torch.cuda.memory_allocated() / 1e9,
+                    torch.cuda.memory_reserved() / 1e9,
+                )
+                del tensor
+                torch.cuda.empty_cache()
+                print(
+                    "GPU mem (alloc/rsrv) after empty_cache:",
+                    torch.cuda.memory_allocated() / 1e9,
+                    torch.cuda.memory_reserved() / 1e9,
+                )
             else:
                 print("PyTorch CUDA not available")
                 print("Possible reasons:")
@@ -160,8 +178,21 @@ class GPUInferenceFlow(FlowSpec):
         try:
             # Load tokenizer and model
             tokenizer = AutoTokenizer.from_pretrained(model_name)
+            # model = AutoModelForCausalLM.from_pretrained(
+            #     model_name, torch_dtype="auto", device_map="auto"
+            # )
             model = AutoModelForCausalLM.from_pretrained(
-                model_name, torch_dtype="auto", device_map="auto"
+                model_name,
+                torch_dtype=bfloat16,  # or torch.float16
+                device_map="cuda",  # force full model to cuda:0
+                low_cpu_mem_usage=True,
+            )
+            print("Param device:", next(model.parameters()).device)
+            print("Device map:", getattr(model, "hf_device_map", None))
+            print(
+                "GPU mem (alloc/rsrv):",
+                torch.cuda.memory_allocated() / 1e9,
+                torch.cuda.memory_reserved() / 1e9,
             )
 
             load_time = time.time() - start_load

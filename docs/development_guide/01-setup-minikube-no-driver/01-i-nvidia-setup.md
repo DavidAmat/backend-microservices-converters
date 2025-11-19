@@ -58,6 +58,22 @@ kubectl describe node david | grep -i nvidia
 ```
 
 
+# Running Hugging Face
+
+Go to `gpu-demo`:
+See guide on `POETRY SETUP`:
+
+```bash
+docker build --platform linux/amd64 -t 192.168.0.112:5000/metaflow-gpu-demo:latest .
+
+# Tag the image for your registry
+# docker tag gpu-inference-demo:latest 192.168.0.112:5000/metaflow-gpu-demo:latest
+
+# Push the new image
+docker push 192.168.0.112:5000/metaflow-gpu-demo:latest
+```
+
+
 
 
 

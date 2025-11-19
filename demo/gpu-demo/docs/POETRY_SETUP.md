@@ -19,7 +19,7 @@ We have a special `Dockerfile.lock-generator` that creates the lock file on the 
 docker build -f Dockerfile.lock-generator -t gpu-demo-lock-generator .
 
 # Run the container to generate poetry.lock
-docker run --rm -v $(pwd):/app gpu-demo-lock-generator poetry lock --no-update
+docker run --rm -v $(pwd):/app gpu-demo-lock-generator poetry lock
 
 # Verify the lock file was created
 ls -lh poetry.lock
@@ -61,7 +61,7 @@ docker run --rm -v $(pwd):/app gpu-demo-lock-generator poetry update transformer
 ```bash
 # First, manually add to pyproject.toml [tool.poetry.dependencies] section
 # Then regenerate the lock:
-docker run --rm -v $(pwd):/app gpu-demo-lock-generator poetry lock --no-update
+docker run --rm -v $(pwd):/app gpu-demo-lock-generator poetry lock
 ```
 
 ---
@@ -105,7 +105,7 @@ docker run --rm -v $(pwd):/app gpu-demo-lock-generator poetry export -f requirem
 
 ```bash
 # Generate/regenerate lock file
-docker run --rm -v $(pwd):/app gpu-demo-lock-generator poetry lock --no-update
+docker run --rm -v $(pwd):/app gpu-demo-lock-generator poetry lock
 
 # Update all dependencies
 docker run --rm -v $(pwd):/app gpu-demo-lock-generator poetry update
