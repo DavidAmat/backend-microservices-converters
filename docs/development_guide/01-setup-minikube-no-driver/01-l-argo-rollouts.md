@@ -79,6 +79,8 @@ kubectl get svc -n argo
 ```bash
 # Access the dashboard in Mac
 kubectl config set-context --current --namespace=argo
+
+# RUN IT!!!
 kubectl argo rollouts dashboard
 ```
 
