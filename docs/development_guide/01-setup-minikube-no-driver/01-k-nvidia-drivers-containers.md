@@ -104,3 +104,7 @@ print("Allocated 1GB on GPU, check nvidia-smi")
 time.sleep(30)
 EOF
 ```
+
+# Summary
+
+We successfully set up a full end-to-end GPU-enabled workflow for a local Argo Workflows + Minikube environment running on an Ubuntu workstation, with a Mac acting purely as the client. We configured Docker on Ubuntu to expose its daemon over DOCKER_HOST so all image builds happen on the powerful Ubuntu machine, even when triggered from the Mac, and we pushed those images into a local registry. We then fixed NVIDIA GPU support inside containers by installing and correctly configuring the NVIDIA Container Toolkit, aligning container CUDA versions with the host driver version (after downgrading the Ubuntu drivers to match CUDA 12.4). With this alignment, we verified that containers could successfully access the host GPU, including through PyTorch, and confirmed that workflow steps inside Argo running on Minikube can detect and utilize the GPU. In short, we achieved a fully GPU-enabled, remotely controlled, containerized development and workflow execution pipeline across Mac → Ubuntu → Minikube

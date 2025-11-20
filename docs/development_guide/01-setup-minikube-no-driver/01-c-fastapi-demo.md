@@ -1,5 +1,11 @@
 # Accessing a running service
 
+- Build container
+```bash
+docker build --platform linux/amd64 -t 192.168.0.112:5000/fastapi-demo:latest .
+
+```
+
 - Apply the fastapi-demo.yaml
 
 - Check the NodePort:
@@ -12,6 +18,7 @@ kubectl get svc
 
 ```bash
 # MAC
+# Make sure you target the same NodePort 31178 as it appears in the get svc
 curl -X POST http://192.168.0.112:31178/add \
   -H "Content-Type: application/json" \
   -d '{"x":3,"y":4}'
